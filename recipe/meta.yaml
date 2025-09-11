@@ -6,12 +6,8 @@ package:
   version: {{ version }}
 
 source:
-  - url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-    sha256: c4310a7d0457f51a63fb019d8ef501588c491141362b53097fbc62fa06559b7c
-  # No'tests' folder in the pypi tarball. Download whole source from github for testing purposes.
-  - url: https://github.com/datastax/python-driver/archive/refs/tags/{{ version }}.tar.gz
-    sha256: aa3be5396e05b395c178091656a329daba23b0d4dd69b8d076090157f86e6d13
-    folder: gh_src
+  url: https://github.com/datastax/python-driver/archive/refs/tags/{{ version }}.tar.gz
+  sha256: aa3be5396e05b395c178091656a329daba23b0d4dd69b8d076090157f86e6d13
 
 build:
   skip: true  # [py<38 or py>312]
@@ -25,6 +21,7 @@ requirements:
     - {{ compiler('c') }}
   host:
     - python
+    - wheel
     - setuptools
     - cython >=0.20,!=0.25,<0.30
     - libev  # [not win]
@@ -33,15 +30,18 @@ requirements:
     - numpy
     - geomet >=0.1,<0.3
     - libev  # [not win]
+  run_constrained:
+    - gremlinpython >=3.4.6
+    - cryptography >=35.0
 
 # Skip due to missing dependencies (puresasl and pyximport).
 # Also, don't run integration tests because they require
 # Cassandra Cluster Manager to be running (no such dependency).
 {% set unit_tests_to_skip = [
-    "gh_src/tests/unit/advanced/test_auth.py",
-    "gh_src/tests/unit/cython/test_bytesio.py",
-    "gh_src/tests/unit/cython/test_types.py",
-    "gh_src/tests/unit/cython/test_utils.py"
+    "tests/unit/advanced/test_auth.py",
+    "tests/unit/cython/test_bytesio.py",
+    "tests/unit/cython/test_types.py",
+    "tests/unit/cython/test_utils.py"
 ] %}
 
 test:
@@ -57,7 +57,7 @@ test:
     - cassandra.datastax.cloud
     - cassandra.column_encryption
   source_files:
-    - gh_src/tests
+    - tests
   requires:
     - pip
     - pytest
@@ -69,9 +69,9 @@ test:
     # limit testing up to python 3.11 as it fails on python 3.12 due to asyncio changes
     # and libev requirement.
     # For OSX, skip as well a test that fails ocasionally with python 3.9.
-    - pytest -v gh_src/tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} # [linux]
-    - pytest -v gh_src/tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} -k "not test_empty_connections" # [osx]
-    - pytest -v gh_src/tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} -k "not test_deserialize_date_range_year" # [win and py<312]
+    - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} # [linux]
+    - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} -k "not test_empty_connections" # [osx]
+    - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} -k "not test_deserialize_date_range_year" # [win and py<312]
 
 about:
   home: https://github.com/datastax/python-driver
