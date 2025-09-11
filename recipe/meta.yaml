@@ -6,20 +6,21 @@ package:
   version: {{ version }}
 
 source:
-  url: https://github.com/datastax/python-driver/archive/refs/tags/{{ version }}.tar.gz
+  url: https://github.com/datastax/python-{{ name.split('-')[1] }}/archive/refs/tags/{{ version }}.tar.gz
   sha256: aa3be5396e05b395c178091656a329daba23b0d4dd69b8d076090157f86e6d13
 
 build:
+  # Python version limited based on documentation and cython availability up to python 3.12
   skip: true  # [py<38 or py>312]
   number: 0
-  script: {{ PYTHON }} setup.py build build_ext -I${PREFIX}/include -L${PREFIX}/lib install --single-version-externally-managed --record record.txt  # [not win]
-  script: {{ PYTHON }} setup.py install --no-cython --single-version-externally-managed --record record.txt  # [win]
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
 
 requirements:
   build:
     - {{ stdlib('c') }}
     - {{ compiler('c') }}
   host:
+    - pip
     - python
     - wheel
     - setuptools
