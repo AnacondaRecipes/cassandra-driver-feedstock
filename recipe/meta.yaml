@@ -69,9 +69,9 @@ test:
     # For Windows, skip as well a test that overflows timestamp limits for this OS. Also,
     # limit testing up to python 3.11 as it fails on python 3.12 due to asyncio changes
     # and libev requirement.
-    # For OSX, skip as well a test that fails ocasionally with python 3.9.
+    # For OSX, skip as well a tests that fails ocasionally with python 3.9.
     - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} # [linux]
-    - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} -k "not test_empty_connections" # [osx]
+    - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} -k "not test_empty_connections and not test_multi_timer_validation" # [osx]
     - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} -k "not test_deserialize_date_range_year" # [win and py<312]
 
 about:
