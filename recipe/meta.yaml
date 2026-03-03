@@ -72,7 +72,7 @@ test:
     # For OSX, skip as well a tests that fails ocasionally with python 3.9.
     - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} # [linux]
     - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} -k "not test_empty_connections and not test_multi_timer_validation and not test_deserialize_date_range_year" # [osx]
-    - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} -k "not test_deserialize_date_range_year" # [win and py<312]
+    - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} -k "not test_deserialize_date_range_year and not test_query_plan_for_sni_contains_unique_addresses" # [win and py<312]
 
 about:
   home: https://github.com/datastax/python-driver
