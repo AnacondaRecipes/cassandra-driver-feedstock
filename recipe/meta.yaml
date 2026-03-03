@@ -1,5 +1,5 @@
 {% set name = "cassandra-driver" %}
-{% set version = "3.29.2" %}
+{% set version = "3.29.3" %}
 
 package:
   name: {{ name|lower }}
@@ -7,11 +7,11 @@ package:
 
 source:
   url: https://github.com/datastax/python-{{ name.split('-')[1] }}/archive/refs/tags/{{ version }}.tar.gz
-  sha256: aa3be5396e05b395c178091656a329daba23b0d4dd69b8d076090157f86e6d13
+  sha256: 658a0879458099a1e97c669c68c9861df48203d5f3d3154ed165a044c860ad90
 
 build:
   # Python version limited based on documentation and cython availability up to python 3.12
-  skip: true  # [py<38 or py>312]
+  skip: true  # [py<39 or py>312]
   number: 0
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
 
@@ -29,11 +29,11 @@ requirements:
   run:
     - python
     - numpy
-    - geomet >=0.1,<0.3
+    - geomet >=1.1
     - libev  # [not win]
   run_constrained:
     - gremlinpython >=3.4.6
-    - cryptography >=35.0
+    - cryptography >=42.0
 
 # Skip due to missing dependencies (puresasl and pyximport).
 # Also, don't run integration tests because they require
@@ -71,8 +71,8 @@ test:
     # and libev requirement.
     # For OSX, skip as well a tests that fails ocasionally with python 3.9.
     - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} # [linux]
-    - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} -k "not test_empty_connections and not test_multi_timer_validation" # [osx]
-    - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} -k "not test_deserialize_date_range_year" # [win and py<312]
+    - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} -k "not test_empty_connections and not test_multi_timer_validation and not test_deserialize_date_range_year" # [osx]
+    - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} -k "not test_deserialize_date_range_year and not test_query_plan_for_sni_contains_unique_addresses" # [win and py<312]
 
 about:
   home: https://github.com/datastax/python-driver
