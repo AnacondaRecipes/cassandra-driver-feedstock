@@ -1,13 +1,22 @@
 {% set name = "cassandra-driver" %}
-{% set version = "3.29.3" %}
+{% set version = "3.30.1" %}
+{% set unit_tests_to_skip = [
+  "tests/unit/advanced/test_auth.py",
+  "tests/unit/cython/test_bytesio.py",
+  "tests/unit/cython/test_types.py",
+  "tests/unit/cython/test_utils.py"
+] %}
 
+# Skip due to missing dependencies (puresasl and pyximport).
+# Also, don't run integration tests because they require
+# Cassandra Cluster Manager to be running (no such dependency).
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
   url: https://github.com/datastax/python-{{ name.split('-')[1] }}/archive/refs/tags/{{ version }}.tar.gz
-  sha256: 658a0879458099a1e97c669c68c9861df48203d5f3d3154ed165a044c860ad90
+  sha256: a59b91f7c7b06fb4fc5be4187f1cd29ae880fdd80607dfa5ae6c360435cc6e60
 
 build:
   # Python version limited based on documentation and cython availability up to python 3.12
@@ -22,28 +31,19 @@ requirements:
   host:
     - pip
     - python
-    - wheel
     - setuptools
-    - cython >=0.20,!=0.25,<0.30
+    - cython >=3.0
     - libev  # [not win]
+    - tomli
   run:
     - python
     - numpy
     - geomet >=1.1
     - libev  # [not win]
+    - deprecated >=1.3.1
   run_constrained:
-    - gremlinpython >=3.4.6
+    - gremlinpython ==3.4.6
     - cryptography >=42.0
-
-# Skip due to missing dependencies (puresasl and pyximport).
-# Also, don't run integration tests because they require
-# Cassandra Cluster Manager to be running (no such dependency).
-{% set unit_tests_to_skip = [
-    "tests/unit/advanced/test_auth.py",
-    "tests/unit/cython/test_bytesio.py",
-    "tests/unit/cython/test_types.py",
-    "tests/unit/cython/test_utils.py"
-] %}
 
 test:
   imports:
@@ -70,13 +70,13 @@ test:
     # limit testing up to python 3.11 as it fails on python 3.12 due to asyncio changes
     # and libev requirement.
     # For OSX, skip as well a tests that fails ocasionally with python 3.9.
-    - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} # [linux]
-    - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} -k "not test_empty_connections and not test_multi_timer_validation and not test_deserialize_date_range_year" # [osx]
-    - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} -k "not test_deserialize_date_range_year and not test_query_plan_for_sni_contains_unique_addresses" # [win and py<312]
+    - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %}  # [linux]
+    - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} -k "not test_empty_connections and not test_multi_timer_validation and not test_deserialize_date_range_year"  # [osx]
+    - pytest -v tests/unit {% for skip in unit_tests_to_skip %}--ignore={{ skip }} {% endfor %} -k "not test_deserialize_date_range_year and not test_query_plan_for_sni_contains_unique_addresses"  # [win and py<312]
 
 about:
   home: https://github.com/datastax/python-driver
-  license:  Apache-2.0
+  license: Apache-2.0
   license_family: APACHE
   license_file: LICENSE
   summary: DataStax Driver for Apache Cassandra
