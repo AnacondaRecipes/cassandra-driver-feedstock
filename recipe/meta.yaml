@@ -8,7 +8,7 @@ package:
 source:
   url: https://github.com/apache/cassandra-python-driver/archive/refs/tags/{{ version }}.tar.gz
   sha256: a59b91f7c7b06fb4fc5be4187f1cd29ae880fdd80607dfa5ae6c360435cc6e60
-  patches:
+  patches:  # [win]
     # libev is not shipped for Windows, but upstream builds the libev extension unconditionally.
     - disable-libev-windows.patch  # [win]
 
